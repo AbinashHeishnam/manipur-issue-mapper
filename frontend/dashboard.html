@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard | Manipur Issue Mapper</title>
+<style>
+body { font-family: Arial; background: #f4f6f9; margin:0; }
+header { background:#0b3c5d; color:white; padding:18px; }
+header h1 { margin:0; }
+.container { max-width: 1200px; margin:20px auto; background:white; padding:20px; border-radius:8px; }
+table { width:100%; border-collapse: collapse; }
+th, td { padding:10px; border-bottom:1px solid #ddd; text-align:left; }
+.btn { padding:5px 10px; background:#0b3c5d; color:white; border:none; cursor:pointer; border-radius:4px; }
+.status-approved { color: green; font-weight: bold; }
+.status-pending { color: orange; font-weight: bold; }
+.status-rejected { color: red; font-weight: bold; }
+.status-inprogress { color: blue; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<header>
+<h1>Citizen Dashboard</h1>
+</header>
+
+<div class="container">
+    <table>
+        <thead>
+            <tr>
+                <th>Sl No</th>
+                <th>User ID</th>
+                <th>Category</th>
+                <th>Location</th>
+                <th>Action</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <tr><td colspan="6">Loading issues...</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<script src="dashboard.js"></script>
+</body>
+</html>

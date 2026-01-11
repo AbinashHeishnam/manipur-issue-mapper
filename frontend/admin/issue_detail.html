@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Issue Detail / Update</title>
+<link rel="stylesheet" href="admin.css">
+</head>
+<body>
+<h2>Issue Detail / Update</h2>
+
+<div id="issueContainer">
+    <p><strong>Title:</strong> <span id="title"></span></p>
+    <p><strong>Description:</strong> <span id="description"></span></p>
+
+    <label>Approve:</label>
+    <select id="approveSelect">
+        <option value="true">✅ Approve</option>
+        <option value="false">❌ Reject</option>
+    </select>
+
+    <label>Department:</label>
+    <select id="departmentInput">
+  <option value="">-- Select Department --</option>
+  <option value="Water Department">Water Department</option>
+  <option value="Electricity Department">Electricity Department</option>
+  <option value="Roads & Infrastructure">Roads & Infrastructure</option>
+  <option value="Sanitation">Sanitation</option>
+  <option value="Health Department">Health Department</option>
+  <option value="Police">Police</option>
+  <option value="Municipality">Municipality</option>
+</select>
+
+
+    <label>Admin Comment:</label>
+    <textarea id="commentInput"></textarea>
+
+    <button id="saveBtn">Save / Update</button>
+    <button id="backBtn">Back to Dashboard</button>
+</div>
+
+<script src="issue_detail.js"></script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Issue Details | Manipur Issue Mapper</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"/>
+
+<style>
+body { margin:0; font-family:'Roboto', sans-serif; background:#f4f6f9; }
+header { background:#0b3c5d; color:white; padding:18px; border-bottom:4px solid #f0a500; }
+.container { max-width:1000px; margin:30px auto; }
+.card { background:white; padding:22px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
+.btn { background:#0b3c5d; color:white; border:none; padding:7px 14px; border-radius:4px; cursor:pointer; font-size:0.9rem; }
+.btn:hover { background:#062c44; }
+#map { height:420px; margin-top:20px; border-radius:8px; background:#eee; display:flex; align-items:center; justify-content:center; color:#555; font-weight:bold; }
+p { margin:8px 0; }
+
+.status-approved { color: green; font-weight: bold; }
+.status-pending { color: orange; font-weight: bold; }
+.status-rejected { color: red; font-weight: bold; }
+.status-inprogress { color: blue; font-weight: bold; }
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Issue Report Details</h1>
+</header>
+
+<div class="container">
+
+    <div style="margin-bottom:15px;">
+        <button class="btn" onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
+    </div>
+
+    <div class="card">
+        <h2 id="title">Loading...</h2>
+        <p><b>Category:</b> <span id="category">Loading...</span></p>
+        <p><b>Description:</b> <span id="description">Loading...</span></p>
+        <p><b>Status:</b> <span id="status">Loading...</span></p>
+        <p><b>Severity:</b> <span id="severity">Loading...</span></p>
+        <p><b>Reported At:</b> <span id="time">Loading...</span></p>
+        <p><b>Location:</b> <span id="location">Loading...</span></p>
+    </div>
+
+    <div id="map">Map data unavailable</div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+<script>
+// Parse issue ID from URL
+const params = new URLSearchParams(window.location.search);
+const id = parseInt(params.get("id"), 10);
+
+if (!id || isNaN(id)) {
+    alert("Invalid issue ID");
+    document.body.innerHTML = "<h2>No issue selected or invalid ID</h2>";
+    throw new Error("Invalid issue ID");
+}
+
+// Helper: reverse geocoding
+async function getAddress(lat, lon) {
+    if (lat == null || lon == null) return "No location found";
+    try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`);
+        const data = await res.json();
+        return data.display_name || "No location found";
+    } catch (err) {
+        console.warn("Reverse geocoding failed", err);
+        return "No location found";
+    }
+}
+
+// Map status to color
+function getStatusClass(issue) {
+    if (issue.approved_by_admin === 1) return 'status-approved';
+    if (issue.approved_by_admin === 0 && issue.status?.toLowerCase() === 'pending') return 'status-pending';
+    if (issue.approved_by_admin === 0 && issue.status?.toLowerCase() === 'rejected') return 'status-rejected';
+    if (issue.status?.toLowerCase() === 'in progress') return 'status-inprogress';
+    return '';
+}
+
+// Load issue details
+async function loadIssue() {
+    try {
+        const res = await fetch(`http://127.0.0.1:8000/api/issues/${id}`);
+        const result = await res.json();
+
+        if (result.status !== "success") {
+            alert(result.message || "Issue not found");
+            document.body.innerHTML = `<h2>${result.message || "Issue not found"}</h2>`;
+            return;
+        }
+
+        const issue = result.data;
+
+        // Fill details
+        document.getElementById('title').innerText = issue.title || "-";
+        document.getElementById('category').innerText = issue.category || "-";
+        document.getElementById('description').innerText = issue.description || "-";
+        document.getElementById('severity').innerText = issue.severity || "Unknown";
+
+        // --- Reported At Fix ---
+        let reportedAt = "Date unavailable";
+        if (issue.timestamp) {
+            const dateObj = new Date(issue.timestamp);
+            reportedAt = isNaN(dateObj.getTime()) ? "Date unavailable" : dateObj.toLocaleString();
+        }
+        document.getElementById('time').innerText = reportedAt;
+
+        // --- Status ---
+        const statusEl = document.getElementById('status');
+        statusEl.innerText = issue.approved_by_admin === 1 ? "Approved" : issue.status || "Pending";
+        statusEl.className = getStatusClass(issue);
+
+        // --- Location ---
+        let locationName = "No location found";
+        if (issue.latitude != null && issue.longitude != null) {
+            locationName = await getAddress(issue.latitude, issue.longitude);
+        }
+        document.getElementById('location').innerText = locationName;
+
+        // --- Map ---
+        if (issue.latitude != null && issue.longitude != null) {
+            const map = L.map("map").setView([issue.latitude, issue.longitude], 15);
+
+            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+                attribution: "© OpenStreetMap contributors"
+            }).addTo(map);
+
+            L.marker([issue.latitude, issue.longitude])
+                .addTo(map)
+                .bindPopup(`<b>${issue.title}</b><br>${locationName}`)
+                .openPopup();
+        } else {
+            document.getElementById('map').innerText = "Map data unavailable";
+        }
+
+    } catch (err) {
+        console.error(err);
+        document.getElementById('title').innerText = "Failed to load issue details";
+        document.getElementById('category').innerText = "-";
+        document.getElementById('description').innerText = "-";
+        document.getElementById('status').innerText = "Unavailable";
+        document.getElementById('severity').innerText = "Unknown";
+        document.getElementById('time').innerText = "Date unavailable";
+        document.getElementById('location').innerText = "No location found";
+        document.getElementById('map').innerText = "Map data unavailable";
+    }
+}
+
+loadIssue();
+</script>
+</body>
+</html>

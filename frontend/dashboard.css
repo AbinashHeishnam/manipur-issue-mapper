@@ -1,0 +1,31 @@
+.status-pending {
+    background-color: orange;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.status-approved {
+    background-color: green;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.status-rejected {
+    background-color: red;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    text-align: center;
+}
+
+.status-inprogress {
+    background-color: blue;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 6px;
+    text-align: center;
+}

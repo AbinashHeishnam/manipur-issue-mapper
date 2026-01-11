@@ -1,0 +1,181 @@
+/* Base */
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    background: linear-gradient(160deg, #0b1f3f 0%, #0f295a 100%);
+    color: #f5f6fa;
+}
+
+/* Header */
+header {
+    background: #002147;
+    padding: 15px 30px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+.header-container {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.logo img {
+    height: 50px;
+}
+
+.header-text h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.header-text p {
+    margin: 0;
+    color: #ffd700;
+    font-size: 0.95rem;
+}
+
+/* Main container */
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 30px;
+    padding: 30px;
+}
+
+/* Form card */
+.form-card {
+    background: #1e2540;
+    padding: 25px;
+    border-radius: 12px;
+    width: 350px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+    transition: transform 0.3s ease;
+}
+
+.form-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Form elements */
+h2 {
+    color: #ffd700;
+}
+
+label {
+    display: block;
+    margin-top: 15px;
+}
+
+select, textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 6px;
+    border: none;
+    font-size: 0.95rem;
+    background: #2c3556;
+    color: #f5f6fa;
+}
+
+select:focus, textarea:focus {
+    outline: 2px solid #ffd700;
+}
+
+/* Submit button */
+button {
+    margin-top: 20px;
+    width: 100%;
+    padding: 12px;
+    background: #ffd700;
+    color: #002147;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+button:hover {
+    background: #e6c200;
+}
+
+/* Map styling */
+#map {
+    flex: 1;
+    height: 550px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+}
+
+/* Footer */
+footer {
+    background: #002147;
+    color: #ffd700;
+    text-align: center;
+    padding: 15px 0;
+    font-size: 0.9rem;
+    box-shadow: 0 -4px 6px rgba(0,0,0,0.3);
+}
+
+/* Responsive */
+@media(max-width: 900px){
+    .container {
+        flex-direction: column;
+        align-items: center;
+    }
+    #map {
+        width: 100%;
+    }
+}
+.dashboard-btn {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #023e8a;
+    color: white;
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+}
+
+.dashboard-btn:hover {
+    background-color: #0077b6;
+}
+/* Table styling */
+#issuesTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    color: black; /* Text color */
+    font-family: 'Roboto', sans-serif;
+}
+
+#issuesTable th, #issuesTable td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+#issuesTable th {
+    background-color: #023e8a;
+    color: white;
+}
+
+/* Home button styling */
+.home-btn {
+    display: inline-block;
+    margin-left: 20px;
+    padding: 8px 15px;
+    background-color: #023e8a;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background 0.3s ease;
+}
+
+.home-btn:hover {
+    background-color: #0077b6;
+}
