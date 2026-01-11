@@ -1,131 +1,185 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Live Issue Map - Manipur</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Issue Map - Manipur</title>
 
-<!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;700&family=Playfair+Display:wght@600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-<!-- Leaflet Heatmap Plugin -->
-<script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-heat/dist/leaflet-heat.js"></script>
 
-<style>
-  body { margin:0; padding:0; font-family: 'Inter', sans-serif; }
-  #map { width: 100%; height: 100vh; }
-  .filter-btns {
-      position: absolute;
-      top: 10px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1000;
-      background: #fff;
-      padding: 8px 12px;
-      border-radius: 8px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  }
-  .filter-btns button {
-      margin: 0 4px;
-      padding: 6px 12px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      background: #1976d2;
-      color: #fff;
-      font-weight: 600;
-  }
-</style>
+    <style>
+        body {
+            overflow: hidden;
+        }
+
+        #map {
+            height: 100vh;
+            border-radius: 0;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+
+        .filter-btn {
+            background: white;
+            border: 1px solid var(--border-color);
+            padding: 6px 16px;
+            border-radius: 99px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: 0.2s;
+        }
+
+        .filter-btn:hover {
+            background: var(--bg-body);
+        }
+
+        .filter-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="filter-btns">
-    <button data-category="All">All</button>
-    <button data-category="Road">Road</button>
-    <button data-category="Water">Water</button>
-    <button data-category="Electricity">Electricity</button>
-    <button data-category="Sanitation">Sanitation</button>
-    <button data-category="Law">Law & Order</button>
-</div>
+    <header>
+        <div class="container header-content">
+            <div class="branding">
+                <img src="assets/logo.png" alt="Emblem">
+                <div class="branding-text">
+                    <h1>Live Heatmap</h1>
+                    <p>Real-Time Monitoring</p>
+                </div>
+            </div>
+            <a href="index.html" class="btn btn-secondary">Back to Portal</a>
+        </div>
+    </header>
 
-<div id="map"></div>
+    <!-- Filters -->
+    <div style="background: white; border-bottom: 1px solid var(--border-color); padding: 12px 0;">
+        <div class="container flex-center gap-2">
+            <button class="filter-btn active" data-cat="all">All Issues</button>
+            <button class="filter-btn" data-cat="Road">Road</button>
+            <button class="filter-btn" data-cat="Water">Water</button>
+            <button class="filter-btn" data-cat="Electricity">Electricity</button>
+            <button class="filter-btn" data-cat="Sanitation">Sanitation</button>
+            <button class="filter-btn" data-cat="Law">Law & Order</button>
+        </div>
+    </div>
 
-<script>
-// ===== MAP INIT =====
-const map = L.map('map').setView([24.8170, 93.9368], 10); // Manipur center
+    <!-- Full Map -->
+    <div style="height: calc(100vh - 130px); width: 100%; position: relative;">
+        <div id="map"></div>
+    </div>
 
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap contributors'
-}).addTo(map);
+    <script>
+        // ===== MAP INIT & LAYERS =====
+        const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        });
 
-let heatLayer = null;
-let allData = [];
+        const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: 'Tiles &copy; Esri'
+        });
 
-// ===== FETCH ISSUES =====
-async function loadIssues() {
-    try {
-        const res = await fetch('http://127.0.0.1:8000/api/issues/');
-        const data = await res.json();
-        if(data.status === 'success') {
-            allData = data.data;
-            updateHeatmap('All');
-        } else {
-            alert('Failed to fetch issues: ' + data.message);
+        const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; CARTO'
+        });
+
+        // Initialize map (single instance)
+        const map = L.map('map', {
+            center: [24.8170, 93.9368],
+            zoom: 10,
+            layers: [darkLayer]
+        });
+
+        // Layer Control
+        const baseMaps = {
+            "Dark Mode": darkLayer,
+            "Street View": streetLayer,
+            "Satellite": satelliteLayer
+        };
+        L.control.layers(baseMaps).addTo(map);
+
+        let heatLayer = null;
+        let allData = [];
+
+        // ===== FETCH ISSUES =====
+        async function loadIssues() {
+            try {
+                const res = await fetch('http://127.0.0.1:8000/api/issues/');
+                const data = await res.json();
+                if (data.status === 'success') {
+                    allData = data.data;
+                    updateHeatmap('all'); // lowercase to match buttons
+                } else {
+                    console.error('Failed to fetch issues: ' + data.message);
+                }
+            } catch (err) {
+                console.error('Fetch error:', err);
+            }
         }
-    } catch(err) {
-        console.error('Fetch error:', err);
-        alert('Could not load issues. Check server.');
-    }
-}
 
-// ===== UPDATE HEATMAP =====
-function updateHeatmap(category) {
-    // Filter issues
-    let filtered = allData;
-    if(category !== 'All') {
-        filtered = allData.filter(i => i.category === category);
-    }
+        // ===== UPDATE HEATMAP =====
+        function updateHeatmap(category) {
+            let filtered = allData;
+            if (category !== 'all') {
+                filtered = allData.filter(i => i.category === category);
+            }
 
-    // Prepare heat data: [lat, lng, intensity]
-    const heatData = filtered.map(i => [
-        i.latitude,
-        i.longitude,
-        i.severity || 1
-    ]);
+            // Prepare heat data: [lat, lng, intensity]
+            const heatData = filtered
+                .filter(i => i.latitude && i.longitude)
+                .map(i => [i.latitude, i.longitude, 0.5]); // 0.5 = default intensity
 
-    // Remove existing heatLayer if exists
-    if(heatLayer) map.removeLayer(heatLayer);
+            if (heatLayer) map.removeLayer(heatLayer);
 
-    // Add new heat layer
-    heatLayer = L.heatLayer(heatData, {
-        radius: 42,
-        blur: 28,
-        maxZoom: 17,
-        gradient: {
-            0.1: '#00ff00',    // bright green (light)
-            0.4: '#ffff00',    // bright yellow (moderate)
-            0.7: '#ffae00',    // orange-yellow (high)
-            0.85: '#ff5500',   // orange-red (very high)
-            1.0: '#ff0000'     // bright red (extreme)
+            heatLayer = L.heatLayer(heatData, {
+                radius: 30,
+                blur: 20,
+                maxZoom: 17,
+                gradient: {
+                    0.2: '#4ade80', // Green
+                    0.5: '#facc15', // Yellow
+                    0.8: '#fca5a5', // Light Red
+                    1.0: '#ef4444'  // Red
+                }
+            }).addTo(map);
         }
-    }).addTo(map);
-}
 
-// ===== FILTER BUTTONS =====
-document.querySelectorAll('.filter-btns button').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const cat = btn.dataset.category;
-        updateHeatmap(cat);
-    });
-});
+        // ===== FILTER BUTTONS =====
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                updateHeatmap(btn.dataset.cat);
+            });
+        });
 
-// ===== INITIAL LOAD =====
-loadIssues();
-</script>
+        // ===== INITIAL LOAD =====
+        loadIssues();
+    </script>
 
 </body>
+
 </html>

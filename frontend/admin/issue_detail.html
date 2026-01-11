@@ -1,43 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>Issue Detail / Update</title>
-<link rel="stylesheet" href="admin.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Issue | Admin</title>
+    <link rel="stylesheet" href="../style.css">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;700&family=Playfair+Display:wght@600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        .detail-row {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 16px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+        }
+
+        .detail-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: var(--text-head);
+        }
+    </style>
 </head>
+
 <body>
-<h2>Issue Detail / Update</h2>
 
-<div id="issueContainer">
-    <p><strong>Title:</strong> <span id="title"></span></p>
-    <p><strong>Description:</strong> <span id="description"></span></p>
+    <header>
+        <div class="container header-content">
+            <div class="branding">
+                <img src="../assets/logo.png" alt="Emblem">
+                <div class="branding-text">
+                    <h1>Issue Management</h1>
+                    <p>Admin Portal</p>
+                </div>
+            </div>
+            <a href="admin.html" class="btn btn-secondary">Back to List</a>
+        </div>
+    </header>
 
-    <label>Approve:</label>
-    <select id="approveSelect">
-        <option value="true">✅ Approve</option>
-        <option value="false">❌ Reject</option>
-    </select>
-
-    <label>Department:</label>
-    <select id="departmentInput">
-  <option value="">-- Select Department --</option>
-  <option value="Water Department">Water Department</option>
-  <option value="Electricity Department">Electricity Department</option>
-  <option value="Roads & Infrastructure">Roads & Infrastructure</option>
-  <option value="Sanitation">Sanitation</option>
-  <option value="Health Department">Health Department</option>
-  <option value="Police">Police</option>
-  <option value="Municipality">Municipality</option>
-</select>
+    <main class="container page-content" style="max-width: 800px;">
+        <div class="card">
+            <h2 id="issueTitle" style="margin-bottom: 8px;">Loading...</h2>
 
 
-    <label>Admin Comment:</label>
-    <textarea id="commentInput"></textarea>
+            <!-- 2-Column Grid Layout -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
+                <!-- Column 1 -->
+                <div
+                    style="background: var(--bg-body); padding: 24px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                    <h3
+                        style="margin-bottom: 16px; font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                        Issue Information</h3>
 
-    <button id="saveBtn">Save / Update</button>
-    <button id="backBtn">Back to Dashboard</button>
-</div>
+                    <div class="detail-row"><span class="detail-label">Status</span><span id="issueStatus"
+                            class="detail-value">-</span></div>
+                    <div class="detail-row"><span class="detail-label">Category</span><span id="issueCategory"
+                            class="detail-value">-</span></div>
+                    <div class="detail-row"><span class="detail-label">Location</span><span id="issueLocation"
+                            class="detail-value" style="text-align:left;">-</span></div>
+                </div>
 
-<script src="issue_detail.js"></script>
+                <!-- Column 2 -->
+                <div
+                    style="background: var(--bg-body); padding: 24px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                    <h3
+                        style="margin-bottom: 16px; font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                        Analysis</h3>
+                    <div class="detail-row"><span class="detail-label">AI Priority</span><span id="issueSeverity"
+                            class="detail-value">-</span></div>
+                    <div class="detail-row"><span class="detail-label">Department</span><span id="displayDept"
+                            class="detail-value">-</span></div>
+                </div>
+            </div>
+
+            <!-- Action Section -->
+            <h3 style="margin-bottom: 16px;">Take Action</h3>
+
+            <div class="form-group">
+                <label>Assign Department</label>
+                <select id="departmentSelect">
+                    <option value="">Select Department</option>
+                    <option value="PWD">Public Works Department (Roads)</option>
+                    <option value="Water Supply">Water Supply Dept</option>
+                    <option value="MSPCL">Manipur State Power Co. (Electricity)</option>
+                    <option value="Police">Manipur Police</option>
+                    <option value="Municipal Council">Municipal Council (Sanitation)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Admin Decision</label>
+                <textarea id="adminComment" placeholder="Enter instructions or reason for rejection..."
+                    style="height: 100px; resize: none;"></textarea>
+            </div>
+
+            <div class="flex-between" style="padding-top: 16px; border-top: 1px solid var(--border-color);">
+                <button id="rejectBtn" class="btn btn-danger">Reject Issue</button>
+                <button id="approveBtn" class="btn btn-primary">Approve & Assign</button>
+            </div>
+        </div>
+    </main>
+
+    <script src="issue_detail.js"></script>
 </body>
+
 </html>

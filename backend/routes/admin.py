@@ -31,6 +31,7 @@ class ApproveIssueRequest(BaseModel):
     approved: bool | None = None        # True=Approve, False=Reject, None=No action
     department: str | None = None
     admin_comment: str | None = None
+    status: str | None = None
 
 @router.post("/issues/{issue_id}/approve")
 def admin_approve_issue(issue_id: int, data: ApproveIssueRequest, authorization: str | None = Header(None)):

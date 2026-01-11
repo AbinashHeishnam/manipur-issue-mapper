@@ -29,13 +29,14 @@ def create_issue(issue: IssueCreate):
 
     return {"status": "success", "issue_id": issue_id}
 
+from typing import Optional
+
 # ---------- GET ALL ISSUES ----------
 @router.get("/issues/")
-def get_issues():
-    return {"status": "success", "data": db_utils.fetch_issues()}
+def get_issues(user_id: Optional[int] = None):
+    return {"status": "success", "data": db_utils.fetch_issues(user_id)}
 
 # ---------- GET SINGLE ISSUE ----------
-@router.get("/issues/{issue_id}")
 @router.get("/issues/{issue_id}")
 def get_issue(issue_id: int):
     row = db_utils.get_issue_by_id(issue_id)
@@ -57,6 +58,7 @@ def get_issue(issue_id: int):
             "ai_severity": row.get("ai_severity") or 1,
             "timestamp": row.get("timestamp"),        # Must exist in DB
             "location": row.get("location") or "",   # Optional, if you store address
+            "user_id": row.get("user_id"), # Added user_id
             "latitude": row.get("latitude"),
             "longitude": row.get("longitude")
         }

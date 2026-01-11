@@ -1,158 +1,289 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<title>Issue Details | Manipur Issue Mapper</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Issue Details | Manipur Issue Mapper</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"/>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;700&family=Playfair+Display:wght@600;700&display=swap"
+        rel="stylesheet">
 
-<style>
-body { margin:0; font-family:'Roboto', sans-serif; background:#f4f6f9; }
-header { background:#0b3c5d; color:white; padding:18px; border-bottom:4px solid #f0a500; }
-.container { max-width:1000px; margin:30px auto; }
-.card { background:white; padding:22px; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); }
-.btn { background:#0b3c5d; color:white; border:none; padding:7px 14px; border-radius:4px; cursor:pointer; font-size:0.9rem; }
-.btn:hover { background:#062c44; }
-#map { height:420px; margin-top:20px; border-radius:8px; background:#eee; display:flex; align-items:center; justify-content:center; color:#555; font-weight:bold; }
-p { margin:8px 0; }
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
-.status-approved { color: green; font-weight: bold; }
-.status-pending { color: orange; font-weight: bold; }
-.status-rejected { color: red; font-weight: bold; }
-.status-inprogress { color: blue; font-weight: bold; }
-</style>
+    <style>
+        /* Specific overrides for issue detail */
+        .detail-row {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            /* Fixed label width */
+            gap: 16px;
+            align-items: center;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .detail-value {
+            font-weight: 500;
+            color: var(--text-main);
+            text-align: left;
+            /* Align values consistently */
+            word-wrap: break-word;
+            /* Prevent overflow */
+        }
+
+        #map {
+            position: relative;
+            /* Override global absolute positioning */
+            width: 100%;
+            height: 400px;
+            border-radius: var(--radius-elem);
+            margin-top: 24px;
+            background: #e2e8f0;
+            z-index: 1;
+        }
+    </style>
 </head>
 
 <body>
 
-<header>
-    <h1>Issue Report Details</h1>
-</header>
+    <header>
+        <div class="container header-content">
+            <div class="branding">
+                <img src="assets/logo.png" alt="Emblem">
+                <div class="branding-text">
+                    <h1>Issue Details</h1>
+                    <p>Government of Manipur</p>
+                </div>
+            </div>
+            <a href="dashboard.html" class="btn btn-primary" style="background: white; color: var(--primary);">Back</a>
+        </div>
+    </header>
 
-<div class="container">
+    <!-- SPLIT LAYOUT: Sidebar (Left) + Map (Right) -->
+    <div class="split-layout">
 
-    <div style="margin-bottom:15px;">
-        <button class="btn" onclick="window.location.href='dashboard.html'">← Back to Dashboard</button>
+        <!-- Sidebar: Scrollable Details -->
+        <div class="sidebar-form">
+            <!-- Header Section -->
+            <div>
+                <div class="flex-between" style="align-items: flex-start; margin-bottom: 12px;">
+                    <span id="status" class="status-pending"
+                        style="font-size: 0.8rem; letter-spacing: 0.5px;">Pending</span>
+                    <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">Measure #<span
+                            id="issueId"></span></span>
+                </div>
+
+                <h2 id="title"
+                    style="margin-bottom: 8px; font-size: 2rem; line-height: 1.2; letter-spacing: -0.5px; color: var(--text-head);">
+                    Loading...</h2>
+
+                <!-- Metadata Row -->
+                <div
+                    style="display: flex; gap: 16px; font-size: 0.9rem; color: var(--text-muted); align-items: center;">
+                    <span style="display: flex; align-items: center; gap: 6px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                        User <span id="userId">-</span>
+                    </span>
+                    <span style="width: 4px; height: 4px; background: #cbd5e1; border-radius: 50%;"></span>
+                    <span id="time">Loading date...</span>
+                </div>
+            </div>
+
+            <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 24px 0;">
+
+            <!-- Description -->
+            <div>
+                <h4
+                    style="font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 12px;">
+                    Description</h4>
+                <p id="description" style="color: var(--text-main); line-height: 1.7; font-size: 1.05rem;">
+                    Loading description...
+                </p>
+            </div>
+
+            <!-- Details Grid -->
+            <!-- Key Details Grid -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+                <div>
+                    <h4 style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">Category</h4>
+                    <span id="category" style="font-weight: 600; font-size: 1rem; color: var(--text-head);">-</span>
+                </div>
+                <div>
+                    <h4 style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">Severity</h4>
+                    <span id="severity" style="font-weight: 600; font-size: 1rem; color: var(--text-head);">-</span>
+                </div>
+                <div>
+                    <h4 style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">Assigned Dept</h4>
+                    <span id="department" style="font-weight: 600; font-size: 1rem; color: var(--primary);">-</span>
+                </div>
+                <div>
+                    <h4 style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px;">Location</h4>
+                    <span id="location"
+                        style="font-weight: 500; font-size: 0.95rem; line-height: 1.4; display: block;">-</span>
+                </div>
+            </div>
+
+            <!-- Admin Comment -->
+            <!-- Admin Comment -->
+            <div id="adminCommentBox"
+                style="background: #eff6ff; border-radius: var(--radius-md); padding: 20px; border-left: 4px solid var(--primary); display: none;">
+                <h4 style="margin-bottom: 8px; font-size: 0.85rem; color: var(--primary); font-weight: 700;">Admin Note
+                </h4>
+                <p id="adminComment" style="font-style: italic; color: var(--text-main); font-size: 0.95rem;">No
+                    comments yet.</p>
+            </div>
+
+            <a href="dashboard.html" class="btn btn-secondary" style="width: 100%;">Back to Dashboard</a>
+        </div>
+
+        <!-- Right: Full Map -->
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+
     </div>
 
-    <div class="card">
-        <h2 id="title">Loading...</h2>
-        <p><b>Category:</b> <span id="category">Loading...</span></p>
-        <p><b>Description:</b> <span id="description">Loading...</span></p>
-        <p><b>Status:</b> <span id="status">Loading...</span></p>
-        <p><b>Severity:</b> <span id="severity">Loading...</span></p>
-        <p><b>Reported At:</b> <span id="time">Loading...</span></p>
-        <p><b>Location:</b> <span id="location">Loading...</span></p>
-    </div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Parse issue ID from URL
+        const params = new URLSearchParams(window.location.search);
+        const id = parseInt(params.get("id"), 10);
 
-    <div id="map">Map data unavailable</div>
-</div>
-
-<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
-<script>
-// Parse issue ID from URL
-const params = new URLSearchParams(window.location.search);
-const id = parseInt(params.get("id"), 10);
-
-if (!id || isNaN(id)) {
-    alert("Invalid issue ID");
-    document.body.innerHTML = "<h2>No issue selected or invalid ID</h2>";
-    throw new Error("Invalid issue ID");
-}
-
-// Helper: reverse geocoding
-async function getAddress(lat, lon) {
-    if (lat == null || lon == null) return "No location found";
-    try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`);
-        const data = await res.json();
-        return data.display_name || "No location found";
-    } catch (err) {
-        console.warn("Reverse geocoding failed", err);
-        return "No location found";
-    }
-}
-
-// Map status to color
-function getStatusClass(issue) {
-    if (issue.approved_by_admin === 1) return 'status-approved';
-    if (issue.approved_by_admin === 0 && issue.status?.toLowerCase() === 'pending') return 'status-pending';
-    if (issue.approved_by_admin === 0 && issue.status?.toLowerCase() === 'rejected') return 'status-rejected';
-    if (issue.status?.toLowerCase() === 'in progress') return 'status-inprogress';
-    return '';
-}
-
-// Load issue details
-async function loadIssue() {
-    try {
-        const res = await fetch(`http://127.0.0.1:8000/api/issues/${id}`);
-        const result = await res.json();
-
-        if (result.status !== "success") {
-            alert(result.message || "Issue not found");
-            document.body.innerHTML = `<h2>${result.message || "Issue not found"}</h2>`;
-            return;
+        if (!id || isNaN(id)) {
+            document.getElementById('detailContainer').innerHTML = `
+                <div style="text-align:center; padding: 40px;">
+                    <h2 style="color: #ef4444; margin-bottom: 16px;">Invalid Issue ID</h2>
+                    <a href="dashboard.html" class="btn btn-secondary">Return to Dashboard</a>
+                </div>`;
+            throw new Error("Invalid issue ID");
         }
 
-        const issue = result.data;
-
-        // Fill details
-        document.getElementById('title').innerText = issue.title || "-";
-        document.getElementById('category').innerText = issue.category || "-";
-        document.getElementById('description').innerText = issue.description || "-";
-        document.getElementById('severity').innerText = issue.severity || "Unknown";
-
-        // --- Reported At Fix ---
-        let reportedAt = "Date unavailable";
-        if (issue.timestamp) {
-            const dateObj = new Date(issue.timestamp);
-            reportedAt = isNaN(dateObj.getTime()) ? "Date unavailable" : dateObj.toLocaleString();
-        }
-        document.getElementById('time').innerText = reportedAt;
-
-        // --- Status ---
-        const statusEl = document.getElementById('status');
-        statusEl.innerText = issue.approved_by_admin === 1 ? "Approved" : issue.status || "Pending";
-        statusEl.className = getStatusClass(issue);
-
-        // --- Location ---
-        let locationName = "No location found";
-        if (issue.latitude != null && issue.longitude != null) {
-            locationName = await getAddress(issue.latitude, issue.longitude);
-        }
-        document.getElementById('location').innerText = locationName;
-
-        // --- Map ---
-        if (issue.latitude != null && issue.longitude != null) {
-            const map = L.map("map").setView([issue.latitude, issue.longitude], 15);
-
-            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-                attribution: "© OpenStreetMap contributors"
-            }).addTo(map);
-
-            L.marker([issue.latitude, issue.longitude])
-                .addTo(map)
-                .bindPopup(`<b>${issue.title}</b><br>${locationName}`)
-                .openPopup();
-        } else {
-            document.getElementById('map').innerText = "Map data unavailable";
+        // Helper: reverse geocoding
+        async function getAddress(lat, lon) {
+            if (lat == null || lon == null) return "No location found";
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`);
+                const data = await res.json();
+                return data.display_name || "No location found";
+            } catch (err) {
+                console.warn("Reverse geocoding failed", err);
+                return "No location found";
+            }
         }
 
-    } catch (err) {
-        console.error(err);
-        document.getElementById('title').innerText = "Failed to load issue details";
-        document.getElementById('category').innerText = "-";
-        document.getElementById('description').innerText = "-";
-        document.getElementById('status').innerText = "Unavailable";
-        document.getElementById('severity').innerText = "Unknown";
-        document.getElementById('time').innerText = "Date unavailable";
-        document.getElementById('location').innerText = "No location found";
-        document.getElementById('map').innerText = "Map data unavailable";
-    }
-}
+        // Map status to color class
+        function getStatusClass(issue) {
+            if (issue.approved_by_admin === 1) return 'status-approved';
+            // Simple logic for other statuses
+            const s = (issue.status || '').toLowerCase();
+            if (s === 'pending') return 'status-pending';
+            if (s === 'rejected') return 'status-rejected';
+            if (s === 'in progress') return 'status-inprogress';
+            return '';
+        }
 
-loadIssue();
-</script>
+        // Load issue details
+        async function loadIssue() {
+            try {
+                const res = await fetch(`http://127.0.0.1:8000/api/issues/${id}`);
+                const result = await res.json();
+
+                if (result.status !== "success") {
+                    document.getElementById('detailContainer').innerHTML = `<h2>${result.message || "Issue not found"}</h2>`;
+                    return;
+                }
+
+                const issue = result.data;
+
+                // Fill details
+                document.getElementById('issueId').innerText = issue.id || "-";
+                document.getElementById('userId').innerText = issue.user_id || "-";
+                document.getElementById('title').innerText = issue.title || "-";
+                document.getElementById('category').innerText = issue.category || "-";
+                document.getElementById('description').innerText = issue.description || "-";
+                document.getElementById('severity').innerText = issue.severity || "Normal";
+                document.getElementById('department').innerText = issue.assigned_department || "Not Assigned";
+
+                if (issue.admin_comment) {
+                    document.getElementById('adminComment').innerText = issue.admin_comment;
+                    document.getElementById('adminCommentBox').style.display = 'block';
+                }
+
+                // --- Reported At Fix ---
+                let reportedAt = "Date unavailable";
+                if (issue.timestamp) {
+                    const dateObj = new Date(issue.timestamp);
+                    reportedAt = isNaN(dateObj.getTime()) ? "Date unavailable" : dateObj.toLocaleString();
+                }
+                document.getElementById('time').innerText = reportedAt;
+
+                // --- Status ---
+                const statusEl = document.getElementById('status');
+                statusEl.innerText = issue.approved_by_admin === 1 ? "Approved" : (issue.status || "Pending");
+                statusEl.className = `detail-value ${getStatusClass(issue)}`;
+
+                // --- Location ---
+                let locationName = "Loading address...";
+                document.getElementById('location').innerText = locationName; // Placeholder
+
+                if (issue.latitude != null && issue.longitude != null) {
+                    locationName = await getAddress(issue.latitude, issue.longitude);
+                    document.getElementById('location').innerText = locationName;
+                } else {
+                    document.getElementById('location').innerText = "No location data";
+                }
+
+                // --- Map ---
+                if (issue.latitude != null && issue.longitude != null) {
+                    const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' });
+                    const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles &copy; Esri' });
+                    const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '&copy; CARTO' });
+
+                    const map = L.map("map", {
+                        center: [issue.latitude, issue.longitude],
+                        zoom: 15,
+                        layers: [streetLayer]
+                    });
+
+                    L.control.layers({ "Street View": streetLayer, "Satellite": satelliteLayer, "Dark Mode": darkLayer }).addTo(map);
+
+                    L.marker([issue.latitude, issue.longitude])
+                        .addTo(map)
+                        .bindPopup(`<b>${issue.title}</b><br>${locationName}`)
+                        .openPopup();
+                } else {
+                    document.getElementById('map').innerHTML = '<div class="flex-center" style="height:100%; color:var(--text-muted);">Map data unavailable</div>';
+                }
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('title').innerText = "Failed to load issue details";
+            }
+        }
+
+        loadIssue();
+    </script>
+
 </body>
+
 </html>

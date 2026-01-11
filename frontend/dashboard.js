@@ -21,11 +21,13 @@ function getStatusText(issue) {
 
 // ----- Fetch and render issues -----
 async function loadIssues() {
-    const tableBody = document.getElementById("tableBody");
+    const tableBody = document.getElementById("issueTableBody");
     tableBody.innerHTML = "<tr><td colspan='6'>Loading...</td></tr>";
 
     try {
-        const res = await fetch("http://127.0.0.1:8000/api/issues/");
+        // Get user ID from localStorage or default to 1 (fallback)
+        const userId = localStorage.getItem('user_id') || 1;
+        const res = await fetch(`http://127.0.0.1:8000/api/issues/?user_id=${userId}`);
         const data = await res.json();
 
         if (data.status !== "success" || !data.data.length) {

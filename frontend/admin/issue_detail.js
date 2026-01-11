@@ -5,14 +5,19 @@ const urlParams = new URLSearchParams(window.location.search);
 const issueId = urlParams.get('id');
 if (!issueId) window.location.href = "admin.html";
 
-const titleEl = document.getElementById("title");
-const descEl = document.getElementById("description");
-const approveEl = document.getElementById("approveSelect");
-const deptEl = document.getElementById("departmentInput");
-const commentEl = document.getElementById("commentInput");
+// Elements
+const titleEl = document.getElementById("issueTitle");
+const categoryEl = document.getElementById("issueCategory");
+const statusEl = document.getElementById("issueStatus");
+const locationEl = document.getElementById("issueLocation");
+const severityEl = document.getElementById("issueSeverity");
 
-const saveBtn = document.getElementById("saveBtn");
-const backBtn = document.getElementById("backBtn");
+const deptSelect = document.getElementById("departmentSelect");
+const commentInput = document.getElementById("adminComment");
+const rejectBtn = document.getElementById("rejectBtn");
+const approveBtn = document.getElementById("approveBtn");
+
+let currentIssue = null;
 
 // ----- Load Issue -----
 async function loadIssue() {
@@ -21,25 +26,47 @@ async function loadIssue() {
             headers: { "Authorization": `Bearer ${token}` }
         });
         const result = await res.json();
-        if (result.status !== "success") throw new Error(result.message);
+
+        if (result.status !== "success") throw new Error(result.message || "Failed to load");
 
         const issue = result.data;
-        titleEl.innerText = issue.title;
-        descEl.innerText = issue.description;
+        currentIssue = issue;
 
-        deptEl.value = issue.assigned_department || "";
-        commentEl.value = issue.admin_comment || "";
+        titleEl.innerText = issue.title || "No Title";
+        categoryEl.innerText = issue.category || "General";
+        statusEl.innerText = issue.status || "Pending";
 
-        // Set select based on DB status
-        approveEl.value = issue.status;
-
-        // Disable fields if finalized
-        if (issue.status === "Resolved" || issue.status === "Rejected") {
-            approveEl.disabled = true;
-            deptEl.disabled = true;
-            commentEl.disabled = true;
-            saveBtn.disabled = true;
+        // Address
+        if (issue.address) {
+            locationEl.innerText = issue.address;
+        } else {
+            // lazy fetch address
+            fetchAddress(issue.latitude, issue.longitude);
         }
+
+        // AI Severity
+        const severityScore = (issue.ai_severity * 10).toFixed(1);
+        severityEl.innerText = `${severityScore}/10`;
+        if (issue.ai_severity > 0.7) severityEl.style.color = "var(--dange)";
+
+        // Style Status
+        updateStatusStyle(issue.status, issue.approved_by_admin);
+
+        // Populate existing admin data
+        if (issue.admin_comment) commentInput.value = issue.admin_comment;
+        if (issue.assigned_department) {
+            deptSelect.value = issue.assigned_department;
+            const displayDept = document.getElementById("displayDept");
+            if (displayDept) displayDept.innerText = issue.assigned_department;
+        }
+
+        // Disable buttons if already processed (optional, depending on workflow)
+        /*
+        if (issue.status === 'Rejected' || issue.approved_by_admin) {
+            approveBtn.disabled = true;
+            rejectBtn.disabled = true;
+        }
+        */
 
     } catch (err) {
         alert("Failed to load issue: " + err.message);
@@ -47,36 +74,90 @@ async function loadIssue() {
     }
 }
 
-// ----- Save / Update -----
-saveBtn.onclick = async () => {
-    const selectedStatus = approveEl.value;  // ENUM-safe
-    const department = deptEl.value;
-    const admin_comment = commentEl.value;
+async function fetchAddress(lat, lng) {
+    try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`);
+        const data = await res.json();
+        locationEl.innerText = data.display_name || `Lat: ${lat}, Lng: ${lng}`;
+    } catch (e) {
+        locationEl.innerText = `Lat: ${lat}, Lng: ${lng}`;
+    }
+}
 
-    let approved = false;
-    if (selectedStatus === "In Progress") approved = true;
-    if (selectedStatus === "Rejected") approved = false;
+function updateStatusStyle(status, approved) {
+    statusEl.className = "detail-value"; // reset
+    if (approved === 1) {
+        statusEl.style.color = "#166534";
+        statusEl.innerText = "Approved & Assigned";
+    } else if (status === "Rejected") {
+        statusEl.style.color = "#991b1b";
+    } else {
+        statusEl.style.color = "#b45309"; // Pending
+    }
+}
+
+// ----- Actions -----
+
+rejectBtn.onclick = () => submitDecision(false);
+approveBtn.onclick = () => submitDecision(true);
+
+async function submitDecision(isApproved) {
+    const comment = commentInput.value.trim();
+    const department = deptSelect.value;
+
+    if (isApproved && !department) {
+        alert("Please assign a department before approving.");
+        return;
+    }
+
+    if (!isApproved && !comment) {
+        if (!confirm("Rejecting without a comment? It's better to provide a reason.")) return;
+    }
+
+    const payload = {
+        approved: isApproved,
+        status: isApproved ? "In Progress" : "Rejected",
+        admin_comment: comment
+    };
+
+    if (isApproved) payload.department = department;
+
+    // UX Updates
+    const btn = isApproved ? approveBtn : rejectBtn;
+    const oldText = btn.innerText;
+    btn.innerText = "Processing...";
+    btn.disabled = true;
+    rejectBtn.disabled = true;
+    approveBtn.disabled = true;
 
     try {
         const res = await fetch(`http://127.0.0.1:8000/api/admin/issues/${issueId}/approve`, {
             method: "POST",
-            headers: { 
+            headers: {
                 "Content-Type": "application/json",
                 "Authorization": `Bearer ${token}`
             },
-            body: JSON.stringify({ approved, department, admin_comment })
+            body: JSON.stringify(payload)
         });
+
         const data = await res.json();
 
-        if (res.status === 400 || res.status === 401) throw new Error(data.detail || "Update failed");
+        if (!res.ok) throw new Error(data.detail || "Server Error");
 
-        alert(data.message || "Updated successfully!");
-        window.location.href = "admin.html";
+        if (data.status === "success") {
+            alert(isApproved ? "Issue approved and assigned!" : "Issue rejected.");
+            window.location.href = "admin.html";
+        } else {
+            throw new Error(data.message || "Unknown error");
+        }
+
     } catch (err) {
-        alert("Error updating issue: " + err.message);
+        console.error(err);
+        alert("Action failed: " + err.message);
+        btn.innerText = oldText;
+        rejectBtn.disabled = false;
+        approveBtn.disabled = false;
     }
-};
-
-backBtn.onclick = () => window.location.href = "admin.html";
+}
 
 loadIssue();

@@ -4,58 +4,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Department Portal | Manipur Issue Mapper</title>
+    <link rel="stylesheet" href="../style.css">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;700&family=Playfair+Display:wght@600;700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
     <header>
         <div class="container header-content">
             <div class="branding">
-                <img src="assets/logo.png" alt="Emblem">
+                <img src="../assets/logo.png" alt="Emblem">
                 <div class="branding-text">
-                    <h1>Citizen Dashboard</h1>
-                    <p>Government of Manipur</p>
+                    <h1 id="deptName">Department Portal</h1>
+                    <p>Task Assignment</p>
                 </div>
             </div>
-            <a href="index.html" class="btn btn-secondary" style="color: var(--text-head);">Back to Portal</a>
+            <button id="logoutBtn" class="btn btn-danger">Sign Out</button>
         </div>
     </header>
 
     <main class="container page-content">
         <div class="card">
-            <div class="flex-between" style="margin-bottom: 24px;">
-                <h2>My Reported Issues</h2>
-                <button class="btn btn-primary" onclick="window.location.href='index.html'">+ New Report</button>
-            </div>
-
+            <h2 style="margin-bottom: 24px;">Assigned Tasks</h2>
             <table>
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>User ID</th>
-                        <th>Category</th>
+                        <th>Title</th>
                         <th>Location</th>
-                        <th>Action</th>
                         <th>Status</th>
+                        <th>Priority (AI)</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody id="issueTableBody">
                     <tr>
-                        <td colspan="6" style="text-align:center;">Loading...</td>
+                        <td colspan="6" style="text-align: center;">Loading tasks...</td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </main>
 
-    <script src="dashboard.js"></script>
-
+    <script src="department.js"></script>
 </body>
 
 </html>
