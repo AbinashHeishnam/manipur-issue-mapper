@@ -1,3 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.venv/
+
+# OS / IDE
+.DS_Store
+.vscode/
+.idea/
+
+# AI artifacts & data (DO NOT COMMIT)
+ai/artifacts/
+ai/data/
+
+
+# Logs
+*.log
 venv/
 .env
 __pycache__/
@@ -5,3 +25,4 @@ __pycache__/
 node_modules/
 .env.*
 *.log
+

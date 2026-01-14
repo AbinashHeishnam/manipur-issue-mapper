@@ -36,6 +36,15 @@ async function loadIssue() {
         categoryEl.innerText = issue.category || "General";
         statusEl.innerText = issue.status || "Pending";
 
+        // Description
+        const descEl = document.getElementById("issueDescription");
+        if (descEl) descEl.innerText = issue.description || "No description provided.";
+
+        // Reporter Info
+        if (document.getElementById("userName")) document.getElementById("userName").innerText = issue.user_name || "Anonymous";
+        if (document.getElementById("userMobile")) document.getElementById("userMobile").innerText = issue.user_mobile || "N/A";
+        if (document.getElementById("userEmail")) document.getElementById("userEmail").innerText = issue.user_email || "N/A";
+
         // Address
         if (issue.address) {
             locationEl.innerText = issue.address;
@@ -58,6 +67,22 @@ async function loadIssue() {
             deptSelect.value = issue.assigned_department;
             const displayDept = document.getElementById("displayDept");
             if (displayDept) displayDept.innerText = issue.assigned_department;
+        }
+
+        // ----- LOCKING LOGIC -----
+        // User Request: "non updatabale after resolved or making it in progress"
+        // Interpretation: If Admin has approved it (In Progress/Resolved), Admin cannot change it.
+        // If it is Pending or Rejected, Admin CAN change it.
+        if (issue.approved_by_admin === 1) {
+            // Already Approved
+            approveBtn.disabled = true;
+            rejectBtn.disabled = true;
+            approveBtn.innerText = "Already Assigned";
+            approveBtn.title = "Decision cannot be changed once assigned";
+
+            // Also disable inputs
+            deptSelect.disabled = true;
+            commentInput.disabled = true;
         }
 
         // Disable buttons if already processed (optional, depending on workflow)

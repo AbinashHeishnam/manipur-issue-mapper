@@ -14,6 +14,23 @@
         href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;700&family=Playfair+Display:wght@600;700&display=swap"
         rel="stylesheet">
     <style>
+        /* Remove background image for Dashboard */
+        body {
+            background-image: none !important;
+            background-color: #f1f5f9 !important;
+        }
+
+        body::before {
+            display: none;
+        }
+
+        .timeline-item {
+            border-left: 2px solid #e2e8f0;
+            padding-left: 20px;
+            position: relative;
+            padding-bottom: 20px;
+        }
+
         .detail-row {
             display: grid;
             grid-template-columns: 140px 1fr;
@@ -38,81 +55,106 @@
 <body>
 
     <header>
-        <div class="container header-content">
-            <div class="branding">
-                <img src="../assets/logo.png" alt="Emblem">
-                <div class="branding-text">
-                    <h1>Issue Management</h1>
-                    <p>Admin Portal</p>
-                </div>
+        <div class="branding">
+            <img src="../assets/logo.png" alt="Emblem" style="height: 48px;">
+            <div class="branding-text">
+                <h1>Issue Management</h1>
+                <p>Admin Portal</p>
             </div>
-            <a href="admin.html" class="btn btn-secondary">Back to List</a>
         </div>
+        <a href="admin.html" class="btn btn-secondary">Back to List</a>
     </header>
 
-    <main class="container page-content" style="max-width: 800px;">
-        <div class="card">
-            <h2 id="issueTitle" style="margin-bottom: 8px;">Loading...</h2>
-
+    <main class="container page-content" style="max-width: 1000px;">
+        <div class="glass-card">
+            <div class="flex-between" style="margin-bottom: 24px;">
+                <h2 id="issueTitle" style="font-size: 1.8rem;">Loading...</h2>
+                <span id="issueStatus" class="status-pending" style="font-size: 1rem;">-</span>
+            </div>
 
             <!-- 2-Column Grid Layout -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px;">
-                <!-- Column 1 -->
-                <div
-                    style="background: var(--bg-body); padding: 24px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 32px; margin-bottom: 32px;">
+                <!-- Column 1: Details -->
+                <div>
                     <h3
-                        style="margin-bottom: 16px; font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                        style="margin-bottom: 20px; font-size: 0.95rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em;">
                         Issue Information</h3>
 
-                    <div class="detail-row"><span class="detail-label">Status</span><span id="issueStatus"
-                            class="detail-value">-</span></div>
                     <div class="detail-row"><span class="detail-label">Category</span><span id="issueCategory"
                             class="detail-value">-</span></div>
                     <div class="detail-row"><span class="detail-label">Location</span><span id="issueLocation"
                             class="detail-value" style="text-align:left;">-</span></div>
+
+                    <div style="margin-top: 24px;">
+                        <h4 style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px;">Description</h4>
+                        <p id="issueDescription" style="line-height: 1.6;">Loading description...</p>
+                    </div>
+
+                    <!-- Reporter Info -->
+                    <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--border-color);">
+                        <h4
+                            style="font-size: 0.95rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; margin-bottom: 16px;">
+                            Reporter Details</h4>
+                        <div class="detail-row"><span class="detail-label">Name</span><span id="userName"
+                                class="detail-value">-</span></div>
+                        <div class="detail-row"><span class="detail-label">Mobile</span><span id="userMobile"
+                                class="detail-value">-</span></div>
+                        <div class="detail-row"><span class="detail-label">Email</span><span id="userEmail"
+                                class="detail-value">-</span></div>
+                    </div>
                 </div>
 
-                <!-- Column 2 -->
-                <div
-                    style="background: var(--bg-body); padding: 24px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                <!-- Column 2: Analysis & Action -->
+                <div style="background: #f8fafc; padding: 24px; border-radius: var(--radius-md); height: fit-content;">
                     <h3
-                        style="margin-bottom: 16px; font-size: 1.1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
-                        Analysis</h3>
-                    <div class="detail-row"><span class="detail-label">AI Priority</span><span id="issueSeverity"
-                            class="detail-value">-</span></div>
-                    <div class="detail-row"><span class="detail-label">Department</span><span id="displayDept"
-                            class="detail-value">-</span></div>
+                        style="margin-bottom: 20px; font-size: 0.95rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em;">
+                        AI Analysis & Action</h3>
+
+                    <div style="margin-bottom: 16px;">
+                        <span class="detail-label" style="display:block; margin-bottom:4px;">Predicted Priority</span>
+                        <span id="issueSeverity" class="detail-value" style="font-size: 1.1rem;">-</span>
+                    </div>
+
+                    <div style="margin-bottom: 24px;">
+                        <span class="detail-label" style="display:block; margin-bottom:4px;">Current Department</span>
+                        <span id="displayDept" class="detail-value" style="color: var(--primary);">-</span>
+                    </div>
+
+                    <hr style="border:0; border-top:1px solid #e2e8f0; margin: 20px 0;">
+
+                    <!-- Action Section -->
+                    <div class="form-group">
+                        <label>Assign Department</label>
+                        <select id="departmentSelect" style="background: white;">
+                            <option value="">Select Department</option>
+                            <option value="Roads & Infrastructure">Roads & Infrastructure</option>
+                            <option value="Water Department">Water Department</option>
+                            <option value="Electricity Department">Electricity Department</option>
+                            <option value="Police">Police</option>
+                            <option value="Sanitation">Sanitation</option>
+                            <option value="Health Department">Health Department</option>
+                            <option value="Municipality">Municipality</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Admin Comments</label>
+                        <textarea id="adminComment" placeholder="Instructions or rejection reason..."
+                            style="height: 100px; resize: none; background: white;"></textarea>
+                    </div>
+
+                    <div class="flex-col gap-2">
+                        <button id="approveBtn" class="btn btn-primary" style="width: 100%;">Approve & Assign</button>
+                        <button id="rejectBtn" class="btn btn-danger"
+                            style="width: 100%; background: white; color: var(--danger); border: 1px solid var(--danger);">Reject
+                            Issue</button>
+                    </div>
                 </div>
-            </div>
-
-            <!-- Action Section -->
-            <h3 style="margin-bottom: 16px;">Take Action</h3>
-
-            <div class="form-group">
-                <label>Assign Department</label>
-                <select id="departmentSelect">
-                    <option value="">Select Department</option>
-                    <option value="PWD">Public Works Department (Roads)</option>
-                    <option value="Water Supply">Water Supply Dept</option>
-                    <option value="MSPCL">Manipur State Power Co. (Electricity)</option>
-                    <option value="Police">Manipur Police</option>
-                    <option value="Municipal Council">Municipal Council (Sanitation)</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label>Admin Decision</label>
-                <textarea id="adminComment" placeholder="Enter instructions or reason for rejection..."
-                    style="height: 100px; resize: none;"></textarea>
-            </div>
-
-            <div class="flex-between" style="padding-top: 16px; border-top: 1px solid var(--border-color);">
-                <button id="rejectBtn" class="btn btn-danger">Reject Issue</button>
-                <button id="approveBtn" class="btn btn-primary">Approve & Assign</button>
             </div>
         </div>
     </main>
 
+    <script src="../utils.js"></script>
     <script src="issue_detail.js"></script>
 </body>
 

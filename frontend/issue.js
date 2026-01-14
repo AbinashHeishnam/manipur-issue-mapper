@@ -19,7 +19,28 @@ if (!issueId) {
             document.getElementById('issueTitle').textContent = issue.title;
             document.getElementById('issueCategory').textContent = issue.category;
             document.getElementById('issueDescription').textContent = issue.description;
-            document.getElementById('issueStatus').textContent = issue.status;
+            // Status styling
+            const statusEl = document.getElementById('issueStatus');
+            statusEl.textContent = issue.status;
+            statusEl.className = ''; // Reset
+
+            const statusLower = (issue.status || "").toLowerCase();
+            if (statusLower === 'resolved') {
+                statusEl.style.color = 'green';
+                statusEl.style.fontWeight = 'bold';
+            } else if (statusLower === 'rejected') {
+                statusEl.style.color = 'red';
+                statusEl.style.fontWeight = 'bold';
+            } else if (statusLower === 'in progress') {
+                statusEl.style.color = 'blue';
+                statusEl.style.fontWeight = 'bold';
+            } else if (issue.approved_by_admin === 1) {
+                statusEl.textContent = "Approved & Assigned";
+                statusEl.style.color = 'green';
+                statusEl.style.fontWeight = 'bold';
+            } else {
+                statusEl.style.color = 'orange'; // Pending
+            }
             document.getElementById('issueSeverity').textContent = issue.severity;
             document.getElementById('issueTimestamp').textContent = new Date(issue.timestamp).toLocaleString();
 

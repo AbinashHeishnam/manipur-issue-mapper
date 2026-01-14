@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Progress | Department</title>
+    <link rel="stylesheet" href="../style.css">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;700&family=Playfair+Display:wght@600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        /* Remove background image for Dashboard */
+        body {
+            background-image: none !important;
+            background-color: #f1f5f9 !important;
+        }
+
+        body::before {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="branding">
+            <img src="../assets/logo.png" alt="Emblem" style="height: 48px;">
+            <div class="branding-text">
+                <h1>Update Progress</h1>
+                <p>Department Portal</p>
+            </div>
+        </div>
+        <a href="department.html" class="btn btn-secondary">Back to Dashboard</a>
+    </header>
+
+    <main class="container page-content" style="max-width: 1000px;">
+        <div class="glass-card">
+            <div class="flex-between" style="margin-bottom: 24px;">
+                <h2 id="issueTitle" style="font-size: 1.8rem;">Loading Issue...</h2>
+                <div style="text-align: right;">
+                    <span style="display: block; font-size: 0.9rem; color: var(--text-muted); margin-bottom: 4px;">Issue
+                        ID #<span id="issueId">-</span></span>
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">Reported: <span
+                            id="issueDate">-</span></span>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 32px;">
+                <!-- Left: Details -->
+                <div>
+                    <h3
+                        style="margin-bottom: 20px; font-size: 0.95rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em;">
+                        Issue Description</h3>
+                    <p id="issueDesc"
+                        style="line-height: 1.6; margin-bottom: 32px; min-height: 60px; color: var(--text-main);">-</p>
+
+                    <h3
+                        style="margin-bottom: 20px; font-size: 0.95rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em;">
+                        Location</h3>
+                    <div id="miniMap"
+                        style="height: 250px; background: #eee; border-radius: var(--radius-md); border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    </div>
+                    <p id="issueAddress"
+                        style="margin-top: 12px; font-size: 0.95rem; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        <span>Fetching address...</span>
+                    </p>
+                </div>
+
+                <!-- Right: Action -->
+                <div style="background: #f8fafc; padding: 24px; border-radius: var(--radius-md); height: fit-content;">
+                    <h3 style="margin-bottom: 20px; font-size: 1.1rem; color: var(--text-head);">Update Status</h3>
+
+                    <div class="form-group">
+                        <label>Current Status</label>
+                        <div id="currentStatus" class="status-inprogress"
+                            style="width: fit-content; font-size: 0.9rem;">-</div>
+                    </div>
+
+                    <form id="updateForm" style="margin-top: 24px;">
+                        <div class="form-group">
+                            <label>New Status</label>
+                            <select id="statusSelect" required style="background: white;">
+                                <option value="In Progress">Work In Progress</option>
+                                <option value="Resolved">Resolved / Completed</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Completion Note</label>
+                            <textarea id="completionNote" placeholder="Describe the work done or progress made..."
+                                style="height: 120px; resize: none; background: white;"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 8px;">Save
+                            Update</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="../utils.js"></script>
+    <script src="update.js"></script>
+
+</body>
+
+</html>

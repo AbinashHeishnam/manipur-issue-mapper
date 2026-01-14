@@ -6,6 +6,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Department Portal | Manipur Issue Mapper</title>
     <link rel="stylesheet" href="../style.css">
+    <style>
+        /* Remove background image for Dashboard */
+        body {
+            background-image: none !important;
+            background-color: #f1f5f9 !important;
+        }
+
+        body::before {
+            display: none;
+        }
+    </style>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,26 +28,53 @@
 
 <body>
     <header>
-        <div class="container header-content">
-            <div class="branding">
-                <img src="../assets/logo.png" alt="Emblem">
-                <div class="branding-text">
-                    <h1 id="deptName">Department Portal</h1>
-                    <p>Task Assignment</p>
-                </div>
+        <div class="branding">
+            <img src="../assets/logo.png" alt="Emblem" style="height: 48px;">
+            <div class="branding-text">
+                <h1 id="deptName">Department Portal</h1>
+                <p>Task Assignment</p>
             </div>
-            <button id="logoutBtn" class="btn btn-danger">Sign Out</button>
         </div>
+        <button id="logoutBtn" class="btn btn-danger">Sign Out</button>
     </header>
 
     <main class="container page-content">
-        <div class="card">
-            <h2 style="margin-bottom: 24px;">Assigned Tasks</h2>
-            <table>
+        <div class="card" style="margin-bottom: 24px; background: transparent; box-shadow: none; padding: 0;">
+            <div class="flex-between" style="align-items: center;">
+                <div>
+                    <h2 style="font-size: 1.5rem; letter-spacing: -0.02em;">Assigned Tasks</h2>
+                </div>
+
+                <div class="flex-center gap-2">
+                    <!-- Filter Component -->
+                    <div class="filter-wrapper">
+                        <button id="filterToggleBtn" class="btn btn-secondary"
+                            style="min-width: 120px; text-align: left; position: relative;">
+                            <span>Filter ▾</span>
+                        </button>
+
+                        <div class="filter-dropdown" id="filterDropdown">
+                            <div class="filter-group">
+                                <label>Date</label>
+                                <input type="date" id="dateFilter">
+                            </div>
+                            <div style="text-align: right;">
+                                <button onclick="clearFilters()" class="btn btn-secondary"
+                                    style="font-size: 0.85rem; padding: 6px 12px;">Clear Filters</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table class="modern-table">
                 <thead>
                     <tr>
-                        <th>#</th>
+                        <th width="50">#</th>
                         <th>Title</th>
+                        <th>Reported</th>
                         <th>Location</th>
                         <th>Status</th>
                         <th>Priority (AI)</th>
@@ -45,13 +83,14 @@
                 </thead>
                 <tbody id="issueTableBody">
                     <tr>
-                        <td colspan="6" style="text-align: center;">Loading tasks...</td>
+                        <td colspan="7" style="text-align:center; padding: 40px;">Loading tasks...</td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </main>
 
+    <script src="../utils.js"></script>
     <script src="department.js"></script>
 </body>
 

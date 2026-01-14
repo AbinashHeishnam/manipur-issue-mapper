@@ -1,57 +1,139 @@
 from fastapi import APIRouter, HTTPException, Header
 from pydantic import BaseModel
-from backend.utils.db_utils import fetch_issues
+from backend.utils.db_utils import (
+    fetch_issues,
+    get_issue_by_id,
+    update_issue_status,
+    get_connection
+)
+import bcrypt
+import uuid
 
 router = APIRouter(prefix="/api/department", tags=["Department"])
 
-# Hardcoded departments and credentials (simplification for prototype)
-DEPARTMENTS = {
-    "water": {"password": "water", "name": "Water Department"},
-    "electricity": {"password": "electricity", "name": "Electricity Department"},
-    "road": {"password": "road", "name": "Roads & Infrastructure"},
-    "sanitation": {"password": "sanitation", "name": "Sanitation"},
-    "health": {"password": "health", "name": "Health Department"},
-    "police": {"password": "police", "name": "Police"},
-    "municipality": {"password": "municipality", "name": "Municipality"}
-}
+# In-memory token store
+DEPT_TOKENS = {}
 
+# ---------------- Models ----------------
 class DeptLoginRequest(BaseModel):
     username: str
     password: str
 
+# ---------------- Login ----------------
 @router.post("/login")
 def dept_login(data: DeptLoginRequest):
-    username = data.username.lower().strip()
-    if username in DEPARTMENTS and DEPARTMENTS[username]["password"] == data.password:
-        return {
-            "status": "success", 
-            "token": f"dept-token-{username}", 
-            "department_name": DEPARTMENTS[username]["name"],
-            "department_id": username
-        }
-    raise HTTPException(status_code=401, detail="Invalid department credentials")
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
 
+    cursor.execute(
+        "SELECT * FROM departments WHERE username=%s",
+        (data.username,)
+    )
+    dept = cursor.fetchone()
+
+    cursor.close()
+    conn.close()
+
+    if not dept:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    if not bcrypt.checkpw(
+        data.password.encode(),
+        dept["password_hash"].encode()
+    ):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    token = f"dept-token-{uuid.uuid4()}"
+    DEPT_TOKENS[token] = dept
+
+    return {
+        "status": "success",
+        "token": token,
+        "department_name": dept["department_name"],
+        "department_id": dept["username"]
+    }
+
+# ---------------- Auth Guard ----------------
+def verify_dept_token(authorization: str | None):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    token = authorization.replace("Bearer ", "")
+    if token not in DEPT_TOKENS:
+        raise HTTPException(status_code=401, detail="Invalid Token")
+
+    return DEPT_TOKENS[token]
+
+# ---------------- Get Issues ----------------
 @router.get("/issues")
 def dept_get_issues(authorization: str | None = Header(None)):
-    if not authorization or not authorization.startswith("Bearer dept-token-"):
-        raise HTTPException(status_code=401, detail="Unauthorized")
-    
-    # Extract department id from fake token
-    dept_id = authorization.split("-token-")[1]
-    
-    if dept_id not in DEPARTMENTS:
-        raise HTTPException(status_code=401, detail="Invalid Token")
-        
-    target_dept_name = DEPARTMENTS[dept_id]["name"]
-    
+    dept = verify_dept_token(authorization)
+
     all_issues = fetch_issues()
-    
-    # Filter issues: 
-    # 1. Assigned to this department
-    # 2. Approved by admin (usually departments only see valid jobs)
-    filtered = [
-        i for i in all_issues 
-        if i["assigned_department"] == target_dept_name and i["approved_by_admin"] == 1
-    ]
-    
+
+    filtered = []
+    for i in all_issues:
+        assigned = i.get("assigned_department")
+        if not assigned:
+            continue
+            
+        # Flexible Matching: "Sanitation" == "Sanitation Department"
+        # Check if one string is contained in the other
+        is_match = (
+            assigned == dept["department_name"] or 
+            assigned in dept["department_name"] or 
+            dept["department_name"] in assigned
+        )
+        
+        if is_match and i["approved_by_admin"] == 1:
+            filtered.append(i)
+
     return {"status": "success", "issues": filtered}
+
+# ---------------- Update Status ----------------
+class UpdateStatusRequest(BaseModel):
+    status: str
+    note: str | None = None
+
+@router.post("/issues/{issue_id}/update")
+def dept_update_issue(
+    issue_id: int,
+    data: UpdateStatusRequest,
+    authorization: str | None = Header(None)
+):
+    dept = verify_dept_token(authorization)
+
+    issue = get_issue_by_id(issue_id)
+    if not issue:
+        raise HTTPException(status_code=404, detail="Issue not found")
+
+    if issue["assigned_department"] != dept["department_name"]:
+        raise HTTPException(status_code=403, detail="Not your department issue")
+
+    update_issue_status(issue_id, data.status)
+
+    return {"status": "success", "message": "Status updated"}
+
+# ---------------- Debug ----------------
+@router.get("/debug")
+def debug_issues():
+    conn = get_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM departments")
+    depts = cursor.fetchall()
+    
+    issues = fetch_issues()
+    conn.close()
+    
+    return {
+        "status": "success",
+        "departments": depts,
+        "issues": [
+            {
+                "id": i["id"],
+                "assigned_department": i["assigned_department"],
+                "approved_by_admin": i["approved_by_admin"],
+                "status": i["status"]
+            } for i in issues
+        ]
+    }

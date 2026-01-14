@@ -7,82 +7,92 @@
     <title>Manipur Issue Reporting Portal</title>
 
     <!-- Leaflet Map -->
+    <!-- Leaflet Map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;700&family=Playfair+Display:wght@600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Merriweather:wght@700&display=swap"
         rel="stylesheet">
 
     <!-- Custom Design System -->
+    <!-- Custom Design System -->
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Remove background image for Index page only */
+        body {
+            background-image: none !important;
+            background-color: #f1f5f9 !important;
+            /* Clean slate background */
+        }
+
+        body::before {
+            display: none;
+        }
+
+        /* Remove dark overlay */
+    </style>
 </head>
 
 <body>
 
     <header>
-        <div class="container header-content">
-            <div class="branding">
-                <img src="assets/logo.png" alt="Emblem">
-                <div class="branding-text">
-                    <h1>Manipur Issue Mapper</h1>
-                    <p>Government of Manipur</p>
-                </div>
+        <div class="branding">
+            <img src="assets/logo.png" alt="Emblem" style="height: 48px;">
+            <div>
+                <h1>Manipur Issue Mapper</h1>
+                <p>Government of Manipur</p>
             </div>
+        </div>
 
-            <div class="nav-actions">
-                <a href="live.html" class="btn btn-secondary">Live Heatmap</a>
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <!-- <button id="dashboardBtn" class="btn btn-secondary">Dashboard</button> REMOVED: Moved to dropdown -->
 
-                <div style="position: relative;">
-                    <img src="https://api.dicebear.com/7.x/identicon/svg?seed=user" alt="Account" class="account-avatar"
-                        id="accountLogo">
-                    <div class="dropdown-menu" id="accountDropdown">
-                        <button class="dropdown-item" onclick="showProfile()">My Profile</button>
-                        <button class="dropdown-item" onclick="window.location.href='dashboard.html'">My
-                            Reports</button>
-                        <button class="dropdown-item danger" id="logoutBtn">Sign Out</button>
+            <a href="live.html" class="btn btn-secondary"
+                style="display: flex; align-items: center; gap: 6px; padding: 8px 16px;">
+                <span>🔴</span> Live Map
+            </a>
+
+            <div style="position: relative;">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Abinash" alt="Account" class="account-avatar"
+                    id="accountLogo">
+
+                <div class="dropdown-menu" id="accountDropdown">
+                    <div style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0;">
+                        <p style="font-weight: 600; font-size: 0.9rem;">Abinash H.</p>
+                        <p style="font-size: 0.8rem; color: var(--text-muted);">Citizen User</p>
                     </div>
+
+                    <button class="dropdown-item" id="myProfileBtn">
+                        👤 My Profile
+                    </button>
+                    <button class="dropdown-item" onclick="window.location.href='dashboard.html'">
+                        📊 Dashboard
+                    </button>
+
+                    <div class="dropdown-divider"></div>
+
+                    <button id="logoutBtn" class="dropdown-item" style="color: var(--danger);">
+                        🚪 Sign Out
+                    </button>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- PROFILE MODAL -->
-    <div class="modal-overlay" id="profileModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>My Profile</h3>
-                <button class="close-modal" onclick="closeProfile()">×</button>
-            </div>
-            <div class="profile-info-row">
-                <span class="profile-label">User ID</span>
-                <span class="profile-value" id="profileUserId">#001</span>
-            </div>
-            <div class="profile-info-row">
-                <span class="profile-label">Phone Number</span>
-                <span class="profile-value">+91 98621 54321</span>
-            </div>
-            <div class="profile-info-row">
-                <span class="profile-label">Role</span>
-                <span class="profile-value">Citizen</span>
-            </div>
-            <div style="margin-top: 24px; text-align: right;">
-                <button class="btn btn-secondary" onclick="closeProfile()">Close</button>
-            </div>
-        </div>
-    </div>
+    <main class="main-grid">
 
-    <div class="split-layout">
-        <!-- Sidebar Form -->
-        <div class="sidebar-form">
-            <h2 style="margin-bottom: 24px;">Report an Issue</h2>
+        <!-- ISSUE FORM -->
+        <section class="glass-card flex-col stagger-1">
+            <h2 style="margin-bottom: 20px; color: var(--primary);">Report Issue</h2>
 
-            <form id="issueForm" autocomplete="off">
+            <form id="issueForm" autocomplete="off" class="flex-col" style="gap: 4px; height: 100%;">
+
                 <div class="form-group">
                     <label>Issue Title</label>
-                    <input type="text" id="title" required placeholder="Brief title...">
+                    <input type="text" id="title" required placeholder="Brief title of the issue">
                 </div>
 
                 <div class="form-group">
@@ -100,44 +110,101 @@
                 <div class="form-group">
                     <label>Location</label>
                     <div class="flex-center gap-2">
-                        <input type="text" id="location" readonly placeholder="Select on map" required>
+                        <input type="text" id="location" readonly placeholder="Click map to select" required>
                         <button type="button" id="detectLocationBtn" class="btn btn-secondary"
-                            title="My Location">📍</button>
+                            title="Use my current location">
+                            📍
+                        </button>
                     </div>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" style="flex-grow: 1;">
                     <label>Description</label>
-                    <textarea id="description" required placeholder="Describe details..."
-                        style="height: 120px; resize: none;"></textarea>
+                    <textarea id="description" required placeholder="Describe the issue in detail..."
+                        style="height: 100%; min-height: 100px; resize: none;"></textarea>
                 </div>
 
-                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 16px;">Submit Official
-                    Report</button>
+                <div class="form-group">
+                    <label>AI Suggestion</label>
+                    <input type="text" id="aiCategory" readonly placeholder="Auto-detected category"
+                        style="opacity: 0.7;">
+                </div>
 
-                <!-- Hidden -->
-                <input type="hidden" id="lat"><input type="hidden" id="lng"><input type="hidden" id="aiCategory">
+                <!-- Hidden coordinates -->
+                <input type="hidden" id="lat">
+                <input type="hidden" id="lng">
+
+                <button type="submit" class="btn btn-primary" style="margin-top: auto;">Submit Issue</button>
             </form>
+        </section>
 
-            <div
-                style="margin-top: auto; padding-top: 32px; font-size: 0.75rem; color: var(--text-muted); text-align: center;">
-                Secure Government Portal • v2.0
-            </div>
-        </div>
-
-        <!-- Map -->
-        <div class="map-container">
+        <!-- MAP -->
+        <section class="glass-card stagger-2" style="padding: 0;">
             <div id="map"></div>
+        </section>
+
+    </main>
+
+
+
+    <!-- Profile Modal (Hidden by default) -->
+    <div id="profileModal" class="modal-overlay"
+        style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 3000; align-items: center; justify-content: center;">
+        <div class="glass-card" style="width: 100%; max-width: 400px; position: relative; background: #fff;">
+            <button id="closeProfileBtn"
+                style="position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted);">&times;</button>
+            <div style="text-align: center; margin-bottom: 24px;">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Abinash" alt="Profile"
+                    style="height: 80px; width: 80px; border-radius: 50%; margin-bottom: 16px; border: 4px solid #f1f5f9;">
+                <h3 id="profileName" style="margin: 0;">Loading...</h3>
+                <p id="profileRole" style="color: var(--text-muted); font-size: 0.9rem;">Citizen User</p>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div
+                    style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #f8fafc; border-radius: 8px;">
+                    <span style="font-size: 1.2rem;">🆔</span>
+                    <div>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">User ID</p>
+                        <p id="profileIdDisplay" style="font-weight: 500; margin: 0;">-</p>
+                    </div>
+                </div>
+
+                <div
+                    style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #f8fafc; border-radius: 8px;">
+                    <span style="font-size: 1.2rem;">📱</span>
+                    <div>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Mobile Number</p>
+                        <p id="profileMobile" style="font-weight: 500; margin: 0;">-</p>
+                    </div>
+                </div>
+
+                <div
+                    style="display: flex; align-items: center; gap: 12px; padding: 12px; background: #f8fafc; border-radius: 8px;">
+                    <span style="font-size: 1.2rem;">📧</span>
+                    <div>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">Email Address</p>
+                        <p id="profileEmail" style="font-weight: 500; margin: 0;">-</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-
+    <footer>
+        <p style="text-align: center; color: var(--text-muted); font-size: 0.8rem; padding-bottom: 20px;">
+            © Government of Manipur • Secure Citizen Reporting Interface
+        </p>
+    </footer>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="utils.js"></script>
 
     <script>
+
+
         // ===== MAP INITIALIZATION =====
+        // ===== MAP INITIALIZATION & LAYERS =====
         // Base Layers
         const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
@@ -164,6 +231,9 @@
             "Dark Mode": darkLayer
         };
         L.control.layers(baseMaps).addTo(map);
+
+        // Official styling overrides
+        // map.getContainer().style.background = "#e2e8f0";
 
         let marker = null;
 
@@ -193,7 +263,7 @@
 
             document.getElementById('lat').value = lat;
             document.getElementById('lng').value = lng;
-            if (window.showToast) showToast("Location selected", "info");
+            showToast("Location selected", "info");
             reverseGeocode(lat, lng);
         });
 
@@ -225,28 +295,22 @@
                 .then(data => { document.getElementById('location').value = data.display_name || ''; });
         }
 
-        // ===== MAP RESIZE FIX =====
-        // Ensures map fills container after Flexbox layout settles
-        setTimeout(() => {
-            map.invalidateSize();
-        }, 200);
-
         // ===== FORM SUBMIT =====
         document.getElementById('issueForm').addEventListener('submit', function (e) {
             e.preventDefault();
 
-            const formContainer = document.querySelector('.sidebar-form');
+            const formCard = document.querySelector('.glass-card'); // Updated selector
             const title = document.getElementById('title').value;
             const category = document.getElementById('category').value;
             const description = document.getElementById('description').value;
             const lat = parseFloat(document.getElementById('lat').value);
             const lng = parseFloat(document.getElementById('lng').value);
+            // Get user ID from localStorage (set during login)
             const userId = localStorage.getItem('user_id') || 1;
 
             if (!title || !category || !description || !lat || !lng) {
-                // Visual shake/error effect
-                formContainer.style.outline = '2px solid #dc2626';
-                setTimeout(() => formContainer.style.outline = '', 1500);
+                formCard.style.boxShadow = '0 0 0 2px var(--dange)';
+                setTimeout(() => formCard.style.boxShadow = '', 1500);
                 alert('Please fill all required fields and select a location.');
                 return;
             }
@@ -259,55 +323,82 @@
                 .then(res => res.json())
                 .then(data => {
                     if (data.status === 'success') {
-                        alert("Report Submitted Successfully!");
+                        formCard.style.boxShadow = '0 0 0 2px var(--success)';
+                        setTimeout(() => formCard.style.boxShadow = '', 1500);
                         this.reset();
                         if (marker) map.removeLayer(marker);
-                        if (window.showToast) showToast("Issue Reported", "success");
                     } else {
+                        formCard.style.boxShadow = '0 0 0 2px var(--dange)';
+                        setTimeout(() => formCard.style.boxShadow = '', 1500);
                         alert('Error: ' + data.message);
                     }
                 })
                 .catch(err => {
+                    formCard.style.boxShadow = '0 0 0 2px var(--dange)';
+                    setTimeout(() => formCard.style.boxShadow = '', 1500);
                     console.error(err);
                     alert('Submit failed. Check console.');
                 });
         });
 
-        // ===== ACCOUNT ACTIONS =====
+        // ===== DASHBOARD & ACCOUNT =====
+        // document.getElementById('dashboardBtn').onclick = () => { window.location.href = 'dashboard.html'; }; // Removed
         const accountLogo = document.getElementById('accountLogo');
         const accountDropdown = document.getElementById('accountDropdown');
 
-        if (accountLogo && accountDropdown) {
-            accountLogo.onclick = e => {
-                accountDropdown.classList.toggle('show');
-                e.stopPropagation();
-            };
-            document.getElementById('logoutBtn').onclick = () => { window.location.href = 'login.html'; };
+        accountLogo.onclick = e => {
+            accountDropdown.classList.toggle('show');
+            e.stopPropagation();
+        };
+        document.getElementById('logoutBtn').onclick = () => { window.location.href = 'login.html'; };
 
-            document.addEventListener('click', e => {
-                if (!accountLogo.contains(e.target) && !accountDropdown.contains(e.target))
-                    accountDropdown.classList.remove('show');
-            });
-        }
+        document.addEventListener('click', e => {
+            if (!accountLogo.contains(e.target) && !accountDropdown.contains(e.target))
+                accountDropdown.classList.remove('show');
+        });
 
         // ===== PROFILE MODAL =====
-        function showProfile() {
-            const uid = localStorage.getItem('user_id') || 'Guest';
-            const profileIdEl = document.getElementById('profileUserId');
-            if (profileIdEl) profileIdEl.textContent = '#' + uid;
+        const profileModal = document.getElementById('profileModal');
+        const closeProfileBtn = document.getElementById('closeProfileBtn');
+        const myProfileBtn = document.getElementById('myProfileBtn');
 
-            document.getElementById('profileModal').classList.add('show');
-            document.getElementById('accountDropdown').classList.remove('show'); // Close dropdown
+        myProfileBtn.onclick = () => {
+            // Close dropdown
+            accountDropdown.classList.remove('show');
+
+            // Open Modal
+            profileModal.style.display = 'flex';
+
+            // Fetch Data
+            const storedUserId = localStorage.getItem('user_id');
+            const userId = storedUserId || 1; // Fallback to 1 for dev if not logged in
+
+            // Update profile UI with ID
+            document.getElementById('profileIdDisplay').textContent = userId;
+
+            fetch(`http://127.0.0.1:8000/api/auth/profile/${userId}`)
+                .then(res => res.json())
+                .then(res => {
+                    if (res.status === 'success') {
+                        const user = res.data;
+                        document.getElementById('profileName').textContent = user.name || "Citizen User";
+                        document.getElementById('profileMobile').textContent = user.mobile || "Not Linked";
+                        document.getElementById('profileEmail').textContent = user.email || "Not Linked";
+                    } else {
+                        showToast("Failed to load profile", "error");
+                    }
+                })
+                .catch(err => console.error(err));
+        };
+
+        closeProfileBtn.onclick = () => {
+            profileModal.style.display = 'none';
+        };
+
+        // Close on outside click
+        profileModal.onclick = (e) => {
+            if (e.target === profileModal) profileModal.style.display = 'none';
         }
-
-        function closeProfile() {
-            document.getElementById('profileModal').classList.remove('show');
-        }
-
-        // Close modal on outside click
-        document.getElementById('profileModal').addEventListener('click', function (e) {
-            if (e.target === this) closeProfile();
-        });
     </script>
 
 </body>

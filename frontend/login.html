@@ -6,32 +6,102 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login | Manipur Issue Mapper</title>
     <link rel="stylesheet" href="style.css">
-
-    <!-- Fonts -->
-    <!-- Fonts -->
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;500;700&family=Playfair+Display:wght@600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:wght@600;700&display=swap"
         rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'DM Sans', sans-serif;
+            background: url('assets/login-bg.png') no-repeat center center/cover;
+            position: relative;
+        }
 
-    <!-- Custom styles in style.css now -->
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 0;
+        }
+
+        .glass-card {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 450px;
+            padding: 48px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+        }
+
+        .user-actions {
+            display: flex;
+            justify-content: space-between;
+            margin: 16px 0;
+        }
+
+        .user-actions button {
+            width: 48%;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .form-group input,
+        select {
+            width: 100%;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .btn {
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            background-color: #3b82f6;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
 </head>
 
-<body style="background: var(--primary); display: flex; align-items: center; justify-content: center; height: 100vh;">
-
-    <div class="card" style="width: 100%; max-width: 400px; padding: 40px; box-shadow: var(--shadow-lg);">
-        <div style="text-align: center; margin-bottom: 32px;">
-            <img src="assets/logo.png" alt="Emblem" style="height: 80px; margin-bottom: 16px;">
-            <h2 style="font-size: 1.5rem; color: var(--text-head); margin-bottom: 8px;">Portal Login</h2>
-            <p
-                style="color: var(--text-muted); font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600;">
-                GOVERNMENT OF MANIPUR</p>
+<body>
+    <div class="glass-card">
+        <div style="text-align:center;margin-bottom:32px;">
+            <img src="assets/logo.png" alt="Emblem" style="height:80px;margin-bottom:16px;">
+            <h2 style="font-size:1.8rem;color:#1e293b;margin-bottom:8px;font-weight:700;">Portal Login</h2>
+            <p style="color:#475569;font-size:0.85rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;">
+                GOVERNMENT OF MANIPUR
+            </p>
         </div>
 
         <div class="form-group">
-            <label for="roleSelect">Select Role</label>
+            <label>Select Role</label>
             <select id="roleSelect">
                 <option value="user">User</option>
                 <option value="admin">Admin</option>
@@ -39,19 +109,30 @@
             </select>
         </div>
 
-        <form id="loginForm"></form>
-
-        <div id="otpSection" style="margin-top: 20px; display: none;">
-            <div class="form-group">
-                <label for="otp">Enter OTP</label>
-                <input type="number" id="otp" placeholder="6-digit OTP">
-            </div>
-            <button type="button" id="verifyOtpBtn" class="btn btn-primary" style="width: 100%;">
-                Verify OTP
-            </button>
+        <div id="userActionButtons" class="user-actions" style="display:none;">
+            <button id="userLoginBtn" class="btn">Login</button>
+            <button id="userSignupBtn" class="btn">Signup</button>
         </div>
 
-        <p style="margin-top: 24px; font-size: 0.75rem; color: #94a3b8; text-align: center;">
+        <form id="loginForm"></form>
+
+        <div id="otpSection" style="margin-top:20px; display:none;">
+            <div class="form-group">
+                <label>Enter OTP</label>
+                <input type="number" id="otp" placeholder="6-digit OTP">
+            </div>
+            <button type="button" id="verifyOtpBtn" class="btn" style="width:100%;">Verify OTP</button>
+        </div>
+
+        <div id="setPasswordSection" style="margin-top:20px; display:none;">
+            <div class="form-group">
+                <label>Set Password</label>
+                <input type="password" id="password" placeholder="Enter password">
+            </div>
+            <button type="button" id="setPasswordBtn" class="btn" style="width:100%;">Set Password</button>
+        </div>
+
+        <p style="margin-top:24px;font-size:0.75rem;color:#64748b;text-align:center;">
             Official Personnel Only. Unauthorized access is prohibited.
         </p>
     </div>

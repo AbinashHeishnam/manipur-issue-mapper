@@ -6,6 +6,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard | Manipur Issue Mapper</title>
   <link rel="stylesheet" href="../style.css">
+  <style>
+    /* Remove background image for Dashboard */
+    body {
+      background-image: none !important;
+      background-color: #f1f5f9 !important;
+    }
+
+    body::before {
+      display: none;
+    }
+  </style>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,45 +26,87 @@
     rel="stylesheet">
 </head>
 
-<body>
+<body class="dashboard-body">
   <header>
-    <div class="container header-content">
-      <div class="branding">
-        <img src="../assets/logo.png" alt="Emblem">
-        <div class="branding-text">
-          <h1>Admin Portal</h1>
-          <p>System Administration</p>
-        </div>
+    <div class="branding">
+      <img src="../assets/logo.png" alt="Emblem" style="height: 48px;">
+      <div class="branding-text">
+        <h1>Admin Portal</h1>
+        <p>System Administration</p>
       </div>
-      <button id="logoutBtn" class="btn btn-danger">Sign Out</button>
     </div>
+    <button id="logoutBtn" class="btn btn-danger">Sign Out</button>
   </header>
 
   <main class="container page-content">
-    <div class="card">
-      <h2 style="margin-bottom: 24px;">Report Management</h2>
-      <table>
+    <div class="card" style="margin-bottom: 24px; background: transparent; box-shadow: none; padding: 0;">
+      <div class="flex-between" style="align-items: center;">
+        <div>
+          <h2 style="font-size: 1.5rem; letter-spacing: -0.02em;">Report Management</h2>
+        </div>
+
+        <div class="flex-center gap-2">
+          <!-- Filter Component -->
+          <div class="filter-wrapper">
+            <button id="filterToggleBtn" class="btn btn-secondary"
+              style="min-width: 120px; text-align: left; position: relative;">
+              <span>Filter ▾</span>
+            </button>
+
+            <div class="filter-dropdown" id="filterDropdown">
+              <div class="filter-group">
+                <label>Date</label>
+                <input type="date" id="dateFilter">
+              </div>
+              <div class="filter-group">
+                <label>Category</label>
+                <select id="categoryFilter">
+                  <option value="">All Categories</option>
+                  <option value="Road">Road</option>
+                  <option value="Water">Water</option>
+                  <option value="Electricity">Electricity</option>
+                  <option value="Waste">Waste</option>
+                  <option value="Law">Law & Order</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div style="text-align: right;">
+                <button onclick="clearFilters()" class="btn btn-secondary"
+                  style="font-size: 0.85rem; padding: 6px 12px;">Clear Filters</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table class="modern-table">
         <thead>
           <tr>
             <th>#</th>
             <th>Title</th>
             <th>User ID</th>
             <th>Category</th>
+            <th>Reported</th>
             <th>Location</th>
             <th>Status</th>
             <th>Department</th>
+            <th>AI</th>
+            <th>Suspicious</th>
             <th>Action</th>
           </tr>
         </thead>
         <tbody id="issueTableBody">
           <tr>
-            <td colspan="7" style="text-align:center;">Loading...</td>
+            <td colspan="11" style="text-align:center; padding: 40px;">Loading...</td>
           </tr>
         </tbody>
       </table>
     </div>
   </main>
 
+  <script src="../utils.js"></script>
   <script src="admin.js"></script>
 </body>
 
